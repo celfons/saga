@@ -32,9 +32,10 @@ open class WorkflowTest {
 
         val workflow = CheckoutWorkflow(data = product, repository = repository)
             .save(INITIAL)
-            .flow(clientService, async = false)
+            .flow(clientService, async = true)
             .save(PROCESSING)
-            .flow(paymentService, async = true)
+            .takeIf { (it.data as Product).isPay!! }
+            .apply { this?.flow(paymentService, async = false) }!! /* TODO use conditional to different flow's */
             .save(SUCCESS)
 
         /*
