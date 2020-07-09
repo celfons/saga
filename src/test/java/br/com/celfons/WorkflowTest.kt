@@ -35,7 +35,8 @@ open class WorkflowTest {
             .save(INITIAL)
             .flow(clientService, async = true)
             .save(PROCESSING)
-            .insideFlow { conditional -> conditional.takeIf { that -> (that?.data as Product).goPay!! }?.flow(paymentService) }
+            .insideFlow { conditional -> conditional.takeIf { that -> (that?.data as Product).goPay!! }
+            ?.flow(paymentService) }
             .save(SUCCESS)
 
         /*
