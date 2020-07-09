@@ -52,6 +52,8 @@ abstract class Workflow(
         ?.also { GlobalScope.launch { service.call(it) } }
         ?: also { service.call(it) }
 
+    inline fun insideFlow(function: (workflow: Workflow?) -> Workflow?): Workflow = this
+
     protected open fun failure(): Workflow? = this /* TODO implements to failure */
 
     protected open fun updateStatus(status: Any? = null): Workflow? = this /* TODO implements update to workflow status */

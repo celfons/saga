@@ -3,6 +3,7 @@ package br.com.celfons
 import br.com.celfons.domains.CheckoutWorkflow
 import br.com.celfons.domains.CheckoutWorkflow.Status.*
 import br.com.celfons.domains.Product
+import br.com.celfons.domains.Workflow
 import br.com.celfons.services.ClientService
 import br.com.celfons.services.PaymentService
 import org.junit.Assert
@@ -34,8 +35,7 @@ open class WorkflowTest {
             .save(INITIAL)
             .flow(clientService, async = true)
             .save(PROCESSING)
-            .takeIf { (it.data as Product).isPay!! }
-            .apply { this?.flow(paymentService, async = false) }!! /* TODO use conditional to different flow's */
+            .insideFlow { conditional -> conditional.takeIf { that -> (that?.data as Product).goPay!! }?.flow(paymentService) }
             .save(SUCCESS)
 
         /*
