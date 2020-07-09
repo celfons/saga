@@ -31,9 +31,10 @@ open class Service: WorkflowService()
 
 WorkflowTest() /* Execute sync or async and sequentially  */
   .save("INITIAL") /* Optional save workflow progress */
-  .flow(service) /* Inject your service  */
+  .flow(service, async = true) /* Inject your sync/async service  */
   .save("PROCESSING")
-  .flow(outherService, true) /* Inject your async service  */
+  .insideFlow { conditional -> conditional.takeIf { that -> (that?.data as Product).goPay!! }
+  ?.flow(paymentService) } /* conditional flow */
   .save("SUCCESS")
   /* Implements workflow rules */
 ```
