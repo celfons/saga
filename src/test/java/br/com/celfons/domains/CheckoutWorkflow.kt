@@ -8,16 +8,18 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 @Component
-open class CheckoutWorkflow(
-    @Id override val id: UUID? = UUID.randomUUID(), /* Overridden to use annotation */
-    override var data: Product? = null, /* Overridden data type */
+class CheckoutWorkflow(
+    @Id override var id: UUID? = UUID.randomUUID(), /* Overridden to use annotation */
+    override var data: Product? = Product(), /* Overridden data type */
     override var status: Status? = Status.INITIAL, /* Overridden status type */
-    @Autowired var repository: JpaRepository<CheckoutWorkflow, UUID>
+    @Autowired var repository: JpaRepository<CheckoutWorkflow, UUID>? = null
 ) : Workflow(id, data, status) {
+
+    constructor(workflow: Workflow?) :  this(workflow?.id, workflow?.data as? Product?, workflow?.status as? Status?)
 
     @Transactional
     override fun save(): Workflow? = this
-        .apply { repository.save(this) }
+        .apply { repository?.save(this) }
         .apply { println("saved: $this") }
 
     override fun rollbackError(): CheckoutWorkflow = this.apply { throw Exception() }

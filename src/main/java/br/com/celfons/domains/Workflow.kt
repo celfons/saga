@@ -21,6 +21,8 @@ abstract class Workflow(
     @Transient protected var flows: MutableMap<WorkflowService, Boolean>? = mutableMapOf()
 ) {
 
+    constructor(workflow: Workflow?) :  this()
+
     internal fun flow(service: WorkflowService, async: Boolean? = false): Workflow =
         runCatching {
             this.takeIf { !rollback!! }
@@ -52,7 +54,7 @@ abstract class Workflow(
         ?.also { GlobalScope.launch { service.call(it) } }
         ?: also { service.call(it) }
 
-    inline fun insideFlow(function: (workflow: Workflow?) -> Workflow?): Workflow = this
+    inline fun insideFlow(function: (workflow: Workflow?) -> Unit): Workflow = this
 
     protected open fun failure(): Workflow? = this /* TODO implements to failure */
 

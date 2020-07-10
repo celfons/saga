@@ -1,9 +1,11 @@
 package br.com.celfons
 
 import br.com.celfons.domains.CheckoutWorkflow
-import br.com.celfons.domains.CheckoutWorkflow.Status.*
+import br.com.celfons.domains.CheckoutWorkflow.Status.ERROR
+import br.com.celfons.domains.CheckoutWorkflow.Status.INITIAL
+import br.com.celfons.domains.CheckoutWorkflow.Status.PROCESSING
+import br.com.celfons.domains.CheckoutWorkflow.Status.SUCCESS
 import br.com.celfons.domains.Product
-import br.com.celfons.domains.Workflow
 import br.com.celfons.services.ClientService
 import br.com.celfons.services.PaymentService
 import org.junit.Assert
@@ -46,6 +48,28 @@ open class WorkflowTest {
          */
 
         Assert.assertEquals(SUCCESS, workflow.status)
+
+    }
+
+    @Test
+    fun executeMultiplesFlows() {
+
+        val product = Product(id = Integer.MAX_VALUE, name = String.toString())
+
+        val workflow1 = CheckoutWorkflow(data = product, repository = repository)
+            .flow(clientService, async = true)
+            .save(INITIAL)
+
+        val workflow2 = repository.findById(workflow1.id!!)
+            .takeIf { it.isPresent }?.get()
+            ?.flow(paymentService)
+            ?.save(PROCESSING)
+
+        CheckoutWorkflow(workflow2)
+            .insideFlow {
+                conditional -> conditional.takeIf { that -> that?.rollback!! }
+                ?.save(ERROR) ?: conditional?.save(SUCCESS)
+            }
 
     }
 
