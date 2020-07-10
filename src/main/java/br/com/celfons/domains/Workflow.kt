@@ -1,11 +1,11 @@
 package br.com.celfons.domains
 
 import br.com.celfons.services.WorkflowService
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
-import java.util.*
-import kotlin.jvm.Transient
+import java.util.UUID
 
 /*
     TODO extends to implements new workflow
@@ -54,7 +54,7 @@ abstract class Workflow(
         ?.also { GlobalScope.launch { service.call(it) } }
         ?: also { service.call(it) }
 
-    inline fun insideFlow(function: (workflow: Workflow?) -> Unit): Workflow = this
+    internal inline fun insideFlow(flow: (workflow: Workflow?) -> Unit): Workflow = this
 
     protected open fun failure(): Workflow? = this /* TODO implements to failure */
 
