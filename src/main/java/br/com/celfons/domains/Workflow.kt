@@ -1,8 +1,8 @@
 package br.com.celfons.domains
 
 import br.com.celfons.services.WorkflowService
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.GlobalScope as Async
+import kotlinx.coroutines.launch as execute
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 import java.util.UUID
@@ -18,7 +18,7 @@ abstract class Workflow(
     open var rollback: Boolean? = false,
     open var creationDate: LocalDateTime? = now(),
     open var updatedDate: LocalDateTime? = now(),
-    @Transient protected var flows: MutableMap<WorkflowService, Boolean>? = mutableMapOf()
+    open var flows: MutableMap<WorkflowService, Boolean>? = mutableMapOf()
 ) {
 
     constructor(workflow: Workflow?) :  this()
@@ -51,7 +51,7 @@ abstract class Workflow(
             }
 
     private fun call(service: WorkflowService, async: Boolean) = this.takeIf { async }
-        ?.also { GlobalScope.launch { service.call(it) } }
+        ?.also { Async.execute { service.call(it) } }
         ?: also { service.call(it) }
 
     internal inline fun insideFlow(flow: (workflow: Workflow?) -> Unit): Workflow = this
